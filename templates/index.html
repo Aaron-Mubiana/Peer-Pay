@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PeerPay - Pay with Bitcoin</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+  <div class="app-container">
+    <div class="sidebar">
+      <div class="logo">
+        <i class="fas fa-bolt"></i>
+        <span>PeerPay</span>
+      </div>
+
+      <!-- Balance Card -->
+      <div class="balance-card" style="display: none;">
+        <div class="balance-header">
+          <i class="fab fa-bitcoin"></i>
+          <h3>Node Balance</h3>
+        </div>
+        <div class="balance-amount" id="btcBalance">
+          <div class="loader"></div>
+        </div>
+        <button onclick="refreshBalances()">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+      </div>
+
+      <!-- QR Code Section -->
+      <div class="qr-section">
+        <div class="qr-code-container" id="siteQRCode"></div>
+        <p class="qr-text">Scan the code to visit the site from your phone</p>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="header">
+        <h1>Bill Payments</h1>
+        <p>Pay bills instantly with Bitcoin</p>
+      </div>
+
+      <!-- Service Tabs -->
+      <div class="service-tabs">
+        <button class="tab-btn active" onclick="openService('airtime')">
+          <i class="fas fa-mobile-alt"></i> Airtime
+        </button>
+        <button class="tab-btn" onclick="openService('electricity')">
+          <i class="fas fa-bolt"></i> Electricity
+        </button>
+        <button class="tab-btn" onclick="openService('water')">
+          <i class="fas fa-tint"></i> Water
+        </button>
+        <button class="tab-btn" onclick="openService('schoolfees')">
+          <i class="fas fa-graduation-cap"></i> School Fees
+        </button>
+      </div>
+
+      <!-- Airtime Section -->
+      <div id="airtime" class="service-content" style="display: block;">
+        <div class="card phone-section">
+          <h2><i class="fas fa-mobile-alt"></i> Recipient Details</h2>
+
+          <div class="form-row">
+            <input type="hidden" id="country" value="ZM">
+            <div class="form-group">
+              <label>Country</label>
+              <div class="readonly-field">Zambia (+260)</div>
+            </div>
+
+            <div class="form-group">
+              <label>Network</label>
+              <select id="carrier" disabled>
+                <option value="">Select Network</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Phone Number</label>
+            <div class="phone-input">
+              <span id="countryCode">+</span>
+              <input type="text" id="phoneNumber" placeholder="Enter phone number" disabled>
+            </div>
+          </div>
+
+          <button id="verifyBtn" onclick="verifyNumber()" disabled>
+            <i class="fas fa-check-circle"></i> Verify Number
+          </button>
+
+          <div class="verification-result" id="verificationResult"></div>
+        </div>
+
+        <div class="card amount-section">
+          <h2><i class="fas fa-money-bill-wave"></i> Amount</h2>
+
+          <div class="form-group">
+            <label>Custom Amount (ZMW)</label>
+            <input type="number" id="customAmount" min="1" step="0.01" placeholder="Enter amount">
+          </div>
+
+          <div class="quick-amounts">
+            <div class="amount-tile" onclick="selectAmount(5)">K5</div>
+            <div class="amount-tile" onclick="selectAmount(10)">K10</div>
+            <div class="amount-tile" onclick="selectAmount(20)">K20</div>
+            <div class="amount-tile" onclick="selectAmount(50)">K50</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Electricity Section -->
+      <div id="electricity" class="service-content">
+        <div class="card">
+          <h2><i class="fas fa-bolt"></i> Electricity Payment</h2>
+
+          <div class="form-group">
+            <label>Utility Company</label>
+            <select id="electricCompany">
+              <option value="">Select Company</option>
+              <option value="zesco">ZESCO</option>
+              <option value="coppernet">Copperbelt Energy Corporation</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Customer Account Number</label>
+            <input type="text" id="electricAccount" placeholder="Enter account number">
+          </div>
+
+          <div class="form-group">
+            <label>Amount (ZMW)</label>
+            <input type="number" id="electricAmount" min="1" step="0.01" placeholder="Enter amount">
+          </div>
+
+          <div class="quick-amounts">
+            <div class="amount-tile" onclick="selectElectricAmount(50)">K50</div>
+            <div class="amount-tile" onclick="selectElectricAmount(100)">K100</div>
+            <div class="amount-tile" onclick="selectElectricAmount(200)">K200</div>
+            <div class="amount-tile" onclick="selectElectricAmount(500)">K500</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Water Section -->
+      <div id="water" class="service-content">
+        <div class="card">
+          <h2><i class="fas fa-tint"></i> Water Payment</h2>
+
+          <div class="form-group">
+            <label>Water Utility</label>
+            <select id="waterCompany">
+              <option value="">Select Utility</option>
+              <option value="lwsc">Lusaka Water and Sewerage Company</option>
+              <option value="nwsc">Nkana Water and Sewerage Company</option>
+              <option value="other">Other Water Utility</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Customer Account Number</label>
+            <input type="text" id="waterAccount" placeholder="Enter account number">
+          </div>
+
+          <div class="form-group">
+            <label>Amount (ZMW)</label>
+            <input type="number" id="waterAmount" min="1" step="0.01" placeholder="Enter amount">
+          </div>
+
+          <div class="quick-amounts">
+            <div class="amount-tile" onclick="selectWaterAmount(30)">K30</div>
+            <div class="amount-tile" onclick="selectWaterAmount(50)">K50</div>
+            <div class="amount-tile" onclick="selectWaterAmount(100)">K100</div>
+            <div class="amount-tile" onclick="selectWaterAmount(150)">K150</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- School Fees Section -->
+      <div id="schoolfees" class="service-content">
+        <div class="card">
+          <h2><i class="fas fa-graduation-cap"></i> School Fees Payment</h2>
+
+          <div class="form-group">
+            <label>Institution</label>
+            <select id="schoolInstitution">
+              <option value="">Select Institution</option>
+              <option value="icu">Information And Communications University</option>
+              <option value="unza">University of Zambia</option>
+              <option value="cbu">Copperbelt University</option>
+              <option value="mu">Mulungushi University</option>
+              <option value="other">Other School</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Student ID/Registration Number</label>
+            <input type="text" id="studentId" placeholder="Enter student ID">
+          </div>
+
+          <div class="form-group">
+            <label>Amount (ZMW)</label>
+            <input type="number" id="schoolAmount" min="1" step="0.01" placeholder="Enter amount">
+          </div>
+
+          <div class="form-group">
+            <label>Student Name</label>
+            <input type="text" id="studentName" placeholder="Enter student full name">
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Section (Common for all services) -->
+      <div class="card payment-section">
+        <h2><i class="fab fa-bitcoin"></i> Payment</h2>
+        <div id="paymentArea" style="display: none;">
+          <div class="invoice-display">
+            <div id="invoiceQRCode"></div>
+            <div class="invoice-details">
+              <p>Scan to pay or copy invoice:</p>
+              <textarea id="paymentRequest" readonly></textarea>
+              <button onclick="copyInvoice()">
+                <i class="far fa-copy"></i> Copy Invoice
+              </button>
+            </div>
+          </div>
+          <div class="payment-status" id="paymentStatus">
+            <div class="status-message">
+              <div class="loader small"></div>
+              <span>Waiting for payment...</span>
+            </div>
+          </div>
+        </div>
+        <div id="paymentPlaceholder">
+          <i class="fas fa-hand-holding-usd"></i>
+          <p>Complete recipient details to proceed with payment</p>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/qrcode.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
+    <script>
+      // Global variables
+      let currentService = 'airtime';
+      let currentAmount = 0;
+      let verifiedNumber = null;
+      const socket = io();
+      let exchangeRate = {
+        btcusd: 50000 // Default value
+      };
+
+      // Fetch exchange rate
+      function fetchExchangeRate() {
+        fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=zmw')
+          .then(response => response.json())
+          .then(data => {
+            exchangeRate.btcusd = data.bitcoin.zmw;
+          })
+          .catch(() => {
+            exchangeRate.btcusd = 50000;
+            console.log('Using fallback exchange rate');
+          });
+      }
+
+      // Initialize
+      document.addEventListener('DOMContentLoaded', function () {
+        // Generate QR code for the current page URL
+        const currentUrl = window.location.href;
+        new QRCode(document.getElementById("siteQRCode"), {
+          text: currentUrl,
+          width: 128,
+          height: 128,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+
+        refreshBalances();
+        fetchExchangeRate();
+        updateCarriers();
+      });
+
+      // Service tab switching
+      function openService(serviceName) {
+        currentService = serviceName;
+
+        // Hide all service contents
+        document.querySelectorAll('.service-content').forEach(content => {
+          content.style.display = 'none';
+        });
+
+        // Show selected service content
+        document.getElementById(serviceName).style.display = 'block';
+
+        // Update active tab styling
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        event.currentTarget.classList.add('active');
+
+        // Reset payment UI
+        resetPaymentUI();
+      }
+
+      // Refresh BTC balance
+      function refreshBalances() {
+        const balanceElement = document.getElementById('btcBalance');
+        balanceElement.innerHTML = '<div class="loader"></div>';
+
+        fetch('/api/btc/balance')
+          .then(response => response.json())
+          .then(data => {
+            if (data.error) {
+              balanceElement.innerHTML = `<span class="error">Error loading</span>`;
+              return;
+            }
+            balanceElement.innerHTML = `
+              <span class="amount">${data.confirmed_balance || 0}</span>
+              <span class="currency">sats</span>
+            `;
+          });
+      }
+
+      // Country selection changed
+      function updateCarriers() {
+        const country = 'ZM';  // Always Zambia
+        const carrierSelect = document.getElementById('carrier');
+        const phoneInput = document.getElementById('phoneNumber');
+        const verifyBtn = document.getElementById('verifyBtn');
+
+        document.getElementById('countryCode').textContent = '+260';
+
+        carrierSelect.innerHTML = '<option value="">Select Network</option>';
+        // Add your carriers here
+        const carriers = {
+          'MTN': { countries: ['ZM'] },
+          'Airtel': { countries: ['ZM'] },
+          'Zamtel': { countries: ['ZM'] }
+        };
+
+        Object.entries(carriers).forEach(([name, data]) => {
+          if (data.countries.includes(country)) {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            carrierSelect.appendChild(option);
+          }
+        });
+
+        carrierSelect.disabled = false;
+      }
+
+      // Carrier selection changed
+      document.getElementById('carrier').addEventListener('change', function () {
+        const phoneInput = document.getElementById('phoneNumber');
+        const verifyBtn = document.getElementById('verifyBtn');
+
+        phoneInput.disabled = !this.value;
+        verifyBtn.disabled = !this.value;
+      });
+
+      // Verify phone number
+      function verifyNumber() {
+        const country = document.getElementById('country').value;
+        const phoneNumber = document.getElementById('phoneNumber').value;
+        const carrier = document.getElementById('carrier').value;
+
+        if (!country || !phoneNumber || !carrier) {
+          showToast('Please fill all fields', 'error');
+          return;
+        }
+
+        const resultDiv = document.getElementById('verificationResult');
+        resultDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Verifying...</div>';
+
+        socket.emit('verify_number', {
+          phone_number: phoneNumber,
+          country_code: country,
+          carrier: carrier
+        });
+      }
+
+      // Handle verification response
+      socket.on('verification_result', (data) => {
+        const resultDiv = document.getElementById('verificationResult');
+
+        if (data.valid) {
+          resultDiv.innerHTML = `
+            <div class="success">
+              <i class="fas fa-check-circle"></i>
+              <div>
+                <strong>${data.formatted}</strong>
+                <div class="carrier-badge">${data.carrier}</div>
+              </div>
+            </div>
+          `;
+          verifiedNumber = {
+            number: data.formatted,
+            carrier: data.carrier
+          };
+          updatePaymentUI();
+        } else {
+          resultDiv.innerHTML = `
+            <div class="error">
+              <i class="fas fa-times-circle"></i>
+              ${data.message || 'Verification failed'}
+            </div>
+          `;
+        }
+      });
+
+      // Amount selection for airtime
+      function selectAmount(amount) {
+        currentAmount = amount;
+        document.getElementById('customAmount').value = amount;
+        updatePaymentUI();
+      }
+
+      // Amount selection for electricity
+      function selectElectricAmount(amount) {
+        currentAmount = amount;
+        document.getElementById('electricAmount').value = amount;
+        updatePaymentUI();
+      }
+
+      // Amount selection for water
+      function selectWaterAmount(amount) {
+        currentAmount = amount;
+        document.getElementById('waterAmount').value = amount;
+        updatePaymentUI();
+      }
+
+      // Input listeners for all amount fields
+      document.getElementById('customAmount').addEventListener('input', function () {
+        currentAmount = parseFloat(this.value) || 0;
+        updatePaymentUI();
+      });
+
+      document.getElementById('electricAmount').addEventListener('input', function () {
+        currentAmount = parseFloat(this.value) || 0;
+        updatePaymentUI();
+      });
+
+      document.getElementById('waterAmount').addEventListener('input', function () {
+        currentAmount = parseFloat(this.value) || 0;
+        updatePaymentUI();
+      });
+
+      document.getElementById('schoolAmount').addEventListener('input', function () {
+        currentAmount = parseFloat(this.value) || 0;
+        updatePaymentUI();
+      });
+
+      // Reset payment UI when switching services
+      function resetPaymentUI() {
+        document.getElementById('paymentArea').style.display = 'none';
+        document.getElementById('paymentPlaceholder').style.display = 'flex';
+        document.getElementById('paymentRequest').value = '';
+        document.getElementById('invoiceQRCode').innerHTML = '';
+        currentAmount = 0;
+        verifiedNumber = null;
+      }
+
+      // Update payment section visibility
+      function updatePaymentUI() {
+        const paymentArea = document.getElementById('paymentArea');
+        const placeholder = document.getElementById('paymentPlaceholder');
+
+        // Check if all required fields are filled for the current service
+        let canProceed = false;
+        let memo = '';
+
+        switch (currentService) {
+          case 'airtime':
+            canProceed = verifiedNumber && currentAmount > 0;
+            memo = `Airtime top-up - $${currentAmount} to ${verifiedNumber?.number}`;
+            break;
+          case 'electricity':
+            const electricCompany = document.getElementById('electricCompany').value;
+            const electricAccount = document.getElementById('electricAccount').value;
+            canProceed = electricCompany && electricAccount && currentAmount > 0;
+            memo = `Electricity payment - $${currentAmount} to ${electricCompany} (${electricAccount})`;
+            break;
+          case 'water':
+            const waterCompany = document.getElementById('waterCompany').value;
+            const waterAccount = document.getElementById('waterAccount').value;
+            canProceed = waterCompany && waterAccount && currentAmount > 0;
+            memo = `Water payment - $${currentAmount} to ${waterCompany} (${waterAccount})`;
+            break;
+          case 'schoolfees':
+            const schoolInstitution = document.getElementById('schoolInstitution').value;
+            const studentId = document.getElementById('studentId').value;
+            const studentName = document.getElementById('studentName').value;
+            canProceed = schoolInstitution && studentId && studentName && currentAmount > 0;
+            memo = `School fees - $${currentAmount} to ${schoolInstitution} for ${studentName} (${studentId})`;
+            break;
+        }
+
+        if (canProceed) {
+          placeholder.style.display = 'none';
+          paymentArea.style.display = 'block';
+          generateInvoice(memo);
+        } else {
+          placeholder.style.display = 'flex';
+          paymentArea.style.display = 'none';
+        }
+      }
+
+      // Global variables
+      let currentUser = null;
+
+      window.carriers = JSON.parse('{{ carriers | tojson | safe }}');
+      window.countries = JSON.parse('{{ countries | tojson | safe }}');
+
+      // Fixed exchange rate (1 ZMW = 37 sats)
+      const FIXED_EXCHANGE_RATE = 37;
+      // Generate BTC invoice
+function generateInvoice(memo) {
+    const amount = currentAmount;
+    if (!amount || amount <= 0) {
+        showToast('Please enter a valid amount', 'error');
+        return;
+    }
+
+    // Convert ZMW to satoshis using fixed rate (1 ZMW = 37 sats)
+    const satsAmount = Math.round(amount * 37);
+
+    const paymentStatus = document.getElementById('paymentStatus');
+    paymentStatus.innerHTML = `
+        <div class="status-message">
+            <div class="loader small"></div>
+            <span>Creating invoice...</span>
+        </div>
+    `;
+
+    // Prepare additional data based on service
+    let additionalData = {};
+    if (currentService === 'airtime') {
+        additionalData = {
+            phone: verifiedNumber.number,
+            carrier: verifiedNumber.carrier
+        };
+    } else if (currentService === 'electricity') {
+        additionalData = {
+            utility: document.getElementById('electricCompany').value,
+            account: document.getElementById('electricAccount').value
+        };
+    } else if (currentService === 'water') {
+        additionalData = {
+            utility: document.getElementById('waterCompany').value,
+            account: document.getElementById('waterAccount').value
+        };
+    } else if (currentService === 'schoolfees') {
+        additionalData = {
+            institution: document.getElementById('schoolInstitution').value,
+            studentId: document.getElementById('studentId').value,
+            studentName: document.getElementById('studentName').value
+        };
+    }
+
+    fetch('/api/btc/create_invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            amount: satsAmount,
+            memo: memo,
+            zmw: amount,  // Changed from usd to zmw
+            service: currentService,
+            ...additionalData
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => Promise.reject(err));
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        document.getElementById('paymentRequest').value = data.payment_request;
+
+        // Generate QR Code
+        const qrCodeElement = document.getElementById('invoiceQRCode');
+        qrCodeElement.innerHTML = '';
+        new QRCode(qrCodeElement, {
+            text: data.payment_request,
+            width: 180,
+            height: 180,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        paymentStatus.innerHTML = `
+            <div class="status-message">
+                <div class="loader small"></div>
+                <span>Waiting for payment of ZMW${amount} (${satsAmount} sats)</span>
+            </div>
+        `;
+
+        // Start checking payment status
+        checkPaymentStatus(data.payment_hash);
+    })
+    .catch(error => {
+        console.error('Invoice error:', error);
+        paymentStatus.innerHTML = `
+            <div class="error">
+                <i class="fas fa-exclamation-circle"></i>
+                ${error.message || 'Failed to create invoice'}
+            </div>
+        `;
+    });
+}
+      function completePayment() {
+        showToast('Payment complete! Processing your request...', 'success');
+        resetPaymentUI();
+
+        // Reset form fields based on current service
+        if (currentService === 'airtime') {
+          document.getElementById('verificationResult').innerHTML = '';
+          document.getElementById('customAmount').value = '';
+        } else if (currentService === 'electricity') {
+          document.getElementById('electricAmount').value = '';
+        } else if (currentService === 'water') {
+          document.getElementById('waterAmount').value = '';
+        } else if (currentService === 'schoolfees') {
+          document.getElementById('schoolAmount').value = '';
+        }
+      }
+
+      function checkPaymentStatus(paymentHash) {
+        const encodedHash = encodeURIComponent(paymentHash);
+
+        fetch(`/api/btc/invoice_status/${encodedHash}`)
+          .then(response => {
+            if (!response.ok) {
+              return response.json().then(err => {
+                if (err.details && err.details.includes('encoding/hex')) {
+                  throw new Error('Invalid payment format. Please try again.');
+                }
+                throw new Error(err.error || `Payment check failed (${response.status})`);
+              });
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.error) {
+              throw new Error(data.error);
+            }
+
+            if (data.settled) {
+              document.getElementById('paymentStatus').innerHTML = `
+                <div class="success-message">
+                  <i class="fas fa-check-circle"></i>
+                  Payment confirmed! Your payment is being processed.
+                </div>
+              `;
+              completePayment();
+            } else {
+              setTimeout(() => checkPaymentStatus(paymentHash), 3000);
+            }
+          })
+          .catch(error => {
+            console.error('Payment status check failed:', error);
+            document.getElementById('paymentStatus').innerHTML = `
+              <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                ${error.message}
+              </div>
+            `;
+
+            if (!error.message.includes('Invalid payment format')) {
+              setTimeout(() => checkPaymentStatus(paymentHash), 5000);
+            }
+          });
+      }
+
+      function copyInvoice() {
+        const invoice = document.getElementById('paymentRequest');
+        invoice.select();
+        document.execCommand('copy');
+        showToast('Invoice copied to clipboard!', 'success');
+      }
+
+      // Toast notification
+      function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+          <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+          ${message}
+        `;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+          toast.classList.add('show');
+          setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+              toast.remove();
+            }, 300);
+          }, 3000);
+        }, 10);
+      }
+    </script>
+</body>
+
+</html>
