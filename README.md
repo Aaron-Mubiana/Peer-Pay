@@ -47,7 +47,7 @@
 ## 🛠️ Technologies
 
 - Python
-- Polar (assuming you mean [Polar SDK](https://github.com/polarbookshelf/polar))
+- Polar [Polar SDK](https://github.com/polarbookshelf/polar)
 - HTML
 - CSS
 - JavaScript
@@ -62,6 +62,7 @@
 - Shemmy Nyirenda      [Twitter-Shemmy](https://x.com/N3Shemmy3)
 - Theresa Kabemba      [Twitter-Theresa](https://x.com/theresa90290567?s=11)
 - Aaron Mubiana        [Twitter-Aaron](https://x.com/AaronMubby)
+
 
 
 
